@@ -1,4 +1,5 @@
 import 'package:face_detect_beta/main.dart';
+import 'package:face_detect_beta/service/api_service.dart';
 import 'package:face_detect_beta/service/camera_service.dart';
 import 'package:face_detect_beta/service/face_detector_service.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
 
   bool _isCameraInitialized = false;
   bool _faceFound = false;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -28,6 +30,16 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
     await _cameraService.initialize(cameras);
     await _cameraService.startImageStream((image) async {
       final detected = await _faceDetectorService.detectFace(image);
+      if (detected != _faceFound) {
+        setState(() => _faceFound = detected);
+      }
+
+      if (detected && !_isProcessing) {
+        print('aqui adsada');
+        _isProcessing = true;
+        await ApiService.sendCapturedImageToApi(_cameraService);
+        _isProcessing = false;
+      }
       if (detected != _faceFound) {
         setState(() => _faceFound = detected);
       }
