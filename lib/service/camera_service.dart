@@ -30,6 +30,12 @@ class CameraService {
     await _cameraController.stopImageStream();
   }
 
+  Future<XFile?> captureImage() async {
+    if (_cameraController != null && _cameraController!.value.isInitialized) {
+      return await _cameraController!.takePicture();
+    }
+    return null;
+  }
   void dispose() {
     _cameraController.dispose();
   }

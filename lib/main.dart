@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'home.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'screens/face_verification_screen.dart';
 
 List<CameraDescription> cameras = [];
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   cameras = await availableCameras();
@@ -18,39 +17,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'Reconhecimento Facial',
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () async {
-            await Permission.camera.request();
-            if (await Permission.camera.isGranted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const FaceVerificationScreen(),
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Permissão da câmera negada')),
-              );
-            }
-          },
-          child: const Text('Verificar Rosto'),
-        ),
-      ),
+      home: const Home(),
     );
   }
 }

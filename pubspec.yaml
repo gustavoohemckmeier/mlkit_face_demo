@@ -50,6 +50,10 @@ dev_dependencies:
   permission_handler: ^11.3.0
   http: ^1.2.1
   path_provider: ^2.1.3
+  path: ^1.8.3
+  image: ^4.1.3
+  sqflite: ^2.3.2
+  tflite_flutter: ^0.11.0
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -60,6 +64,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/models/mobilefacenet.tflite
 
   # To add assets to your application, add an assets section, like this:
   # assets:
