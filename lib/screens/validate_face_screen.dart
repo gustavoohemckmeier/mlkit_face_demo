@@ -1,6 +1,8 @@
+
 import 'dart:io';
 import 'dart:math';
 import 'package:face_detect_beta/main.dart';
+import 'package:face_detect_beta/screens/face_not_recognized_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:path/path.dart' as p;
@@ -26,6 +28,8 @@ class _ValidateFaceScreenState extends State<ValidateFaceScreen> {
 
   bool _isDetecting = false;
   String _status = "Aguardando rosto...";
+  int _attempts = 0;
+  final int _maxAttempts = 5;
 
   @override
   void initState() {
@@ -50,7 +54,7 @@ class _ValidateFaceScreenState extends State<ValidateFaceScreen> {
       print("[DEBUG] Analisando imagem da câmera...");
       final hasFace = await _faceDetectorService.detectFace(cameraImage);
       print("[DEBUG] Face detectada: \$hasFace");
-print(hasFace);
+
       if (hasFace) {
         _cameraService.controller!.stopImageStream();
         final xfile = await _cameraService.captureImage();
@@ -60,14 +64,30 @@ print(hasFace);
           final currentEmbedding = await _embeddingService.getEmbedding(file);
 
           final saved = await _sqliteService.getAllEmbeddingsForUser("user_test");
-          print('##############################');
-          print(saved);
-          print('##############################');
+          print('[DEBUG] Embeddings salvos: \$saved');
+
           final match = saved.any((e) => _compareEmbeddings(currentEmbedding, e));
 
           setState(() {
             _status = match ? "Rosto reconhecido ✅" : "Não reconhecido ❌";
           });
+
+          if (!match) {
+            _attempts++;
+            print("[DEBUG] Tentativa \$_attempts de \$_maxAttempts");
+
+            if (_attempts >= _maxAttempts) {
+              if (mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FaceNotRecognizedScreen()),
+                );
+              }
+              return;
+            }
+
+            Future.delayed(const Duration(seconds: 2), () => _detectFace());
+          }
         }
       }
 

@@ -118,6 +118,7 @@ class _RegisterFaceScreenState extends State<RegisterFaceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Validação Facial")),
       body: _isCameraReady && (_cameraService.controller?.value.isInitialized ?? false)
           ? CameraPreview(_cameraService.controller!)
           : const Center(child: CircularProgressIndicator()),
