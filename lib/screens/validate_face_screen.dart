@@ -25,7 +25,7 @@ class _ValidateFaceScreenState extends State<ValidateFaceScreen> {
   final FaceDetectorService _faceDetectorService = FaceDetectorService();
   final EmbeddingService _embeddingService = EmbeddingService();
   final SqliteService _sqliteService = SqliteService();
-
+  String nome = "";
   bool _isDetecting = false;
   String _status = "Aguardando rosto...";
   int _attempts = 0;
@@ -51,9 +51,9 @@ class _ValidateFaceScreenState extends State<ValidateFaceScreen> {
       if (_isDetecting) return;
 
       _isDetecting = true;
-      print("[DEBUG] Analisando imagem da câmera...");
+      // print("[DEBUG] Analisando imagem da câmera...");
       final hasFace = await _faceDetectorService.detectFace(cameraImage);
-      print("[DEBUG] Face detectada: \$hasFace");
+      // print("[DEBUG] Face detectada: $hasFace");
 
       if (hasFace) {
         _cameraService.controller!.stopImageStream();
@@ -63,18 +63,33 @@ class _ValidateFaceScreenState extends State<ValidateFaceScreen> {
           final file = File(xfile.path);
           final currentEmbedding = await _embeddingService.getEmbedding(file);
 
-          final saved = await _sqliteService.getAllEmbeddingsForUser("user_test");
-          print('[DEBUG] Embeddings salvos: \$saved');
+          final savedEmbeddings = await _sqliteService.getAllEmbeddingsGroupedByUser();
+          // print('[DEBUG] Embeddings salvos: $savedEmbeddings');
 
-          final match = saved.any((e) => _compareEmbeddings(currentEmbedding, e));
+          bool match = false;
+          String matchedName = "";
+
+          for (var entry in savedEmbeddings.entries) {
+            for (var savedEmbedding in entry.value) {
+              if (_compareEmbeddings(currentEmbedding, savedEmbedding)) {
+                match = true;
+                matchedName = entry.key;
+                break;
+              }
+            }
+            if (match) break;
+          }
 
           setState(() {
-            _status = match ? "Rosto reconhecido ✅" : "Não reconhecido ❌";
+            nome = matchedName;
+            _status = match
+                ? "Rosto reconhecido ✅\nUsuário: $nome"
+                : "Não reconhecido ❌";
           });
 
           if (!match) {
             _attempts++;
-            print("[DEBUG] Tentativa \$_attempts de \$_maxAttempts");
+            // print("[DEBUG] Tentativa $_attempts de $_maxAttempts");
 
             if (_attempts >= _maxAttempts) {
               if (mounted) {

@@ -77,11 +77,11 @@ class _RegisterFaceScreenState extends State<RegisterFaceScreen> {
                 Navigator.of(context).pop();
                 _initializeCamera();
               },
-              onConfirm: () async {
+              onConfirm: (String name) async {
                 final embedding = await _embeddingService.getEmbedding(file);
                 final appDir = await getApplicationDocumentsDirectory();
 
-                final imageFileName = 'face_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                final imageFileName = 'face_\${DateTime.now().millisecondsSinceEpoch}.jpg';
                 final faceDir = Directory(p.join(appDir.path, 'face_data'));
                 await faceDir.create(recursive: true);
 
@@ -89,7 +89,7 @@ class _RegisterFaceScreenState extends State<RegisterFaceScreen> {
                 final savedImage = await file.copy(savedImagePath);
 
                 await _sqliteService.insertEmbedding(
-                  userId: 'user_test',
+                  userId: name,
                   imagePath: savedImage.path,
                   embedding: embedding,
                 );
